@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 import json
 import os
-import sys
+import posixpath
 import xml.etree.ElementTree as ET
-
+import sys
 import qbittorrentapi
 import requests
 
@@ -33,7 +33,7 @@ def create_config(conf_path: str):
 
 def get_feed_title(feed_url: str):
     proxies = {"http": "http://127.0.0.1:10800", "https": "http://127.0.0.1:10800"}
-    # 如果想使用代理来获取订阅标题，则使用下一行语句，注释下下行语句
+    # 如果需要，则启用代理来获取订阅标题
     # r = requests.get(feed_url, proxies=proxies)
     r = requests.get(feed_url)
     root = ET.fromstring(r.text)
@@ -69,8 +69,21 @@ def rss_rule_set(
     feed_url: str,
     must_not_contain: str,
     romaji: str,
+    season_number: int,
 ):
-    save_path = os.path.join(conf_dict["qb_save_path"], romaji)
+    if season_number == 1:
+        # 因为需要使用qbwebui的时候，基本都是qb运行在linux系统上，
+        # 但是本代码的运行环境未必会是linux系统，
+        # 如果直接使用os.path.join，并且python运行环境是windows的话，
+        # 会导致拼接路径的符号变成“\”，从而导致qbt创建文件夹时候出现错误，
+        # 该错误会导致“\”后不会被认为是子文件夹，而是文件夹名称的一部分，
+        # 从而会使qbt创建出奇怪的文件夹，并且会在其中下载文件。
+        save_path = posixpath.join(conf_dict["qb_save_path"], bangumi_name)
+    else:
+        save_path = posixpath.join(
+            conf_dict["qb_save_path"], bangumi_name, f"S0{season_number}"
+        )
+        # 测试不使用罗马音能否正确的刮削元数据
     rule = {
         "enable": True,
         "mustContain": bangumi_name,
@@ -108,16 +121,24 @@ if __name__ == "__main__":
         sys.exit()
     # =======================================================================
     # 番剧名称、同时也是RSS自动下载中“必须包含”的字
-    bangumi_name = "我推的孩子"
+    bangumi_name = "腼腆英雄"
     # 番剧罗马音，下载的番剧存储的文件夹名称，同时方便刮削元数据
-    romaji = "Oshi no Ko"
+    romaji = "not use"
     # 订阅网址
-    feed_url = "https://mikanime.tv/RSS/Bangumi?bangumiId=2995&subgroupid=552"
+    feed_url = "https://mikanime.tv/RSS/Bangumi?bangumiId=3147&subgroupid=583"
     # RSS自动下载中“不可包含”的字
     # must_not_contain = "720|CHT|繁体|B-Global|BIG5"
     must_not_contain = ""
+    # 如果季度不为1则启用季度子文件夹
+    season_number = 1
     # =======================================================================
 
     rss_rule_set(
-        qbt_client, conf_dict, bangumi_name, feed_url, must_not_contain, romaji
+        qbt_client,
+        conf_dict,
+        bangumi_name,
+        feed_url,
+        must_not_contain,
+        romaji,
+        season_number,
     )

@@ -12,6 +12,9 @@
 目前代码写法需要消耗大量IO，暂时没找到更好的写法。
 # Rss_Rule_Set.py
 通过qbittorrentapi库操作QB的WEBUI，自动设置RSS订阅及RSS订阅自动下载规则，省去手动管理。
+### 主要依赖：
+qbittorrent-api  
+`pip install qbittorrent-api`
 ### 使用方法：
 首次运行会自动创建一个配置文件，需要手动修改配置文件中的用户名及密码配置。
 ```

@@ -43,16 +43,18 @@ def del_tc_ass_file(dir_path: str):
     if len(get_filepath_list(dir_path, [".ass", ".srt"])) == 0:
         return
     print("选择需要删除的字幕所包含的字符串：")
-    print("1.tc.ass 2.TC.ass 3.cht.ass 4.自定义")
+    print("1.tc.ass 2.TC.ass 3.cht.ass 4.自定义请直接输入，直接回车键跳过")
     ext_list = ["tc.ass", "TC.ass", "cht.ass"]
-    i = int(input(""))
-    if i == 4:
-        print("请输入字符串：")
-        ext = input("")
-    else:
+    i = input()
+    if i.isnumeric():
+        i = int(i)
         ext = ext_list[i - 1]
-    for i in get_filepath_list(dir_path, [ext]):
-        os.remove(i)
+        for i in get_filepath_list(dir_path, [ext]):
+            os.remove(i)
+    else:
+        if i != "":
+            for i in get_filepath_list(dir_path, i):
+                os.remove(i)
 
 
 def get_bangumi_info() -> Tuple[str, str, int]:
@@ -103,13 +105,13 @@ def rename_files(
     input("按下任意键开始重命名，退出请直接关闭程序。")
 
     # 创建log文件，可以通过log文件进行逆重命名。
-    log_path = os.path.join(dir_path, "rename_log.log")
-    with open(log_path, "a", encoding="utf-8") as ff:
-        ff.write(
-            "\n".join(
-                [f"{old_name}\t{new_name}" for old_name, new_name in media_rename_list]
-            )
-        )
+    # log_path = os.path.join(dir_path, "rename_log.log")
+    # with open(log_path, "a", encoding="utf-8") as ff:
+    #     ff.write(
+    #         "\n".join(
+    #             [f"{old_name}\t{new_name}" for old_name, new_name in media_rename_list]
+    #         )
+    #     )
 
     # 重命名文件
     for f, f_new in media_rename_list:

@@ -64,7 +64,7 @@ def get_qb_client(conf_dict: dict):
 
 
 def rss_rule_set(
-    qbt_client,
+    qbt_client: qbittorrentapi.Client,
     conf_dict: dict,
     bangumi_name: str,
     feed_url: str,
@@ -74,7 +74,7 @@ def rss_rule_set(
     proxy: bool,
 ):
     # 是否使用罗马音作为文件夹名称
-    if romaji == "not use":  # 如果传入"not use"则不使用罗马音而是使用中文名做文件夹名称
+    if romaji == "not use":
         folder_name = bangumi_name
     else:
         folder_name = romaji
@@ -114,7 +114,10 @@ def rss_rule_set(
     print("番剧存储文件夹：")
     print(save_path)
     input("请确认订阅信息!按下Enter确定!")
-    qbt_client.torrents_create_category(bangumi_name)
+    try:
+        qbt_client.torrents_create_category(bangumi_name)
+    except qbittorrentapi.exceptions.Conflict409Error:
+        print("无法在QB中创建对应番剧名称的分类，可能已经存在该分类")
     qbt_client.rss_add_feed(feed_url, get_feed_title(feed_url, proxy))
     qbt_client.rss_set_rule(rule_name=bangumi_name, rule_def=rule)
 
@@ -127,15 +130,17 @@ if __name__ == "__main__":
         sys.exit()
     # =======================================================================
     # 番剧名称、同时也是RSS自动下载中“必须包含”的字
-    bangumi_name = "神剑闯江湖 ―明治剑客浪漫谭―"
+    bangumi_name = "怪兽 8 号"
     # 番剧罗马音，下载的番剧存储的文件夹名称，同时方便刮削元数据
-    romaji = "not use"  # 传入"not use"则表示文件夹名称不使用罗马音而使用番剧名称
+    romaji = "not use"
     # 订阅网址
-    feed_url = "https://mikanime.tv/RSS/Bangumi?bangumiId=3073&subgroupid=583"
+    feed_url = "https://mikanani.me/RSS/Bangumi?bangumiId=3301&subgroupid=583"
+    # 如果是gfw外网址则替换回国内网址
+    feed_url = feed_url.replace("mikanani.me", "mikanime.tv")
     # RSS自动下载中“不可包含”的字
+    # 720|CHT|繁体|B-Global|BIG5|港澳台|bilibili
     must_not_contain = ""
-    # must_not_contain = "720|CHT|繁体|B-Global|BIG5|港澳台|bilibili"
-    # 番剧季度，如果季度不为1则启用季度子文件夹
+    # 如果季度不为1则启用季度子文件夹
     season_number = 1
     # 获取订阅标题时使用代理
     use_proxy = False

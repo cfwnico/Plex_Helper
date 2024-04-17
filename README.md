@@ -17,6 +17,7 @@
 `目前该代码运行会消耗大量IO，暂时没找到更好的写法。`
 # Rss_Rule_Set.py
 通过qbittorrentapi库操作QB的WEBUI，自动设置RSS订阅及RSS订阅自动下载规则，省去手动管理。
+注意：目标QB的运行环境仅限定Linux环境。  
 ### 主要依赖：
 qbittorrent-api  
 `pip install qbittorrent-api`
